@@ -1,6 +1,15 @@
 ---
 - hosts: all
   tasks:
+  - name: export env vars
+    lineinfile:
+      path: ~/.bashrc
+      state: present
+      line: "export {{item}}"
+    loop:
+    - "GOPATH=~/go"
+    - "GOROOT=/usr/local/go"
+    - "PATH=${PATH}:${GOROOT}/bin"
   - name: clone bash-it
     git:
       repo: https://github.com/Bash-it/bash-it.git
@@ -19,6 +28,8 @@
       dest: ~/.vim
   - name: install vim config
     command: ~/.vim/update
+  - name: install golang
+    command: "{{ansible_env.PWD}}/scripts/go.sh"
   - name: setup symlinks
     file:
       path: "{{item.target}}"
