@@ -1,0 +1,32 @@
+---
+- hosts: all
+  tasks:
+  - name: clone bash-it
+    git:
+      repo: https://github.com/Bash-it/bash-it.git
+      dest: ~/.bash_it
+  - name: install bash-it
+    command: ~/.bash_it/install.sh --silent
+  - name: apply bash-it theme
+    replace:
+      path: ~/.bashrc
+      regexp: "export BASH_IT_THEME='bobby'"
+      backup: "yes"
+      replace: "export BASH_IT_THEME='minimal'"
+  - name: clone vim config
+    git:
+      repo: https://github.com/luan/vimfiles.git
+      dest: ~/.vim
+  - name: install vim config
+    command: ~/.vim/update
+  - name: setup symlinks
+    file:
+      path: "{{item.target}}"
+      src: "{{item.src}}"
+      state: link
+      force: yes
+    with_items:
+    - src: "{{ansible_env.PWD}}/config/.tmux.conf"
+      target: "~/.tmux.conf"
+    - src: "{{ansible_env.PWD}}/config/.gitconfig"
+      target: "~/.gitconfig"
