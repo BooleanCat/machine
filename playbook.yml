@@ -58,6 +58,14 @@
       name: go
       state: latest
       update_homebrew: yes
+  - name: 'golang: env vars'
+    lineinfile:
+      path: ~/.bashrc
+      state: present
+      line: 'export {{ item }}'
+    with_items:
+    - 'GOPATH="${HOME}/go"'
+    - 'PATH="${PATH}:${GOPATH}/bin"'
 
   - name: rust
     homebrew:
@@ -100,14 +108,34 @@
       state: latest
       update_homebrew: yes
 
-  - name: clone vim config
+  - name: 'vim: clone config'
     git:
       repo: https://github.com/luan/vimfiles.git
       dest: ~/.vim
-  - name: install vim config
+  - name: 'vim: configure'
     command: ~/.vim/update
+  - name: 'vim: install neovim'
+    homebrew:
+      name: neovim
+      state: latest
+      update_homebrew: yes
+  - name: 'vim: install neovim pip'
+    pip:
+      name: neovim
+      state: latest
 
-  # config
+  - name: ripgrep
+    homebrew:
+      name: ripgrep
+      state: latest
+      update_homebrew: yes
+
+  - name: direnv
+    homebrew:
+      name: direnv
+      state: latest
+      update_homebrew: true
+
   - name: setup symlinks
     file:
       path: "{{item.target}}"
