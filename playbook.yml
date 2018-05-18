@@ -23,9 +23,23 @@
     lineinfile:
       path: ~/.bashrc
       state: present
-      line: "export {{ item }}"
-    loop:
-    - 'PATH="/home/linuxbrew/.linuxbrew/bin:${PATH}"'
+      line: 'export PATH="/home/linuxbrew/.linuxbrew/bin:${PATH}"'
+
+  - name: 'snapd'
+    apt:
+      name: snapd
+      update_cache: yes
+    become: yes
+
+  - name: spotify
+    command: snap install spotify
+    become: yes
+
+  - name: 'atom: editor'
+    command: snap install --classic atom
+    become: yes
+  - name: 'atom: plugins'
+    command: apm install minimap
 
   - name: golang
     homebrew:
@@ -36,6 +50,41 @@
   - name: rust
     homebrew:
       name: rust
+      state: latest
+      update_homebrew: yes
+
+  - name: pyenv
+    homebrew:
+      name: "{{ item }}"
+      state: latest
+      update_homebrew: yes
+    with_items:
+    - pyenv
+    - pyenv-virtualenv
+  - name: 'pyenv: python build dependencies'
+    apt:
+      name: "{{ item }}"
+      update_cache: yes
+    become: yes
+    with_items:
+    - make
+    - build-essential
+    - libssl-dev
+    - zlib1g-dev
+    - libbz2-dev
+    - libreadline-dev
+    - libsqlite3-dev
+    - wget
+    - curl
+    - llvm
+    - libncurses5-dev
+    - libncursesw5-dev
+    - xz-utils
+    - tk-dev
+
+  - name: lua
+    homebrew:
+      name: lua
       state: latest
       update_homebrew: yes
 
