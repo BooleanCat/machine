@@ -41,6 +41,14 @@
   - name: 'atom: plugins'
     command: apm install minimap
 
+  - name: chromium
+    command: snap install chromium
+    become: yes
+
+  - name: docker
+    command: snap install docker
+    become: yes
+
   - name: golang
     homebrew:
       name: go
