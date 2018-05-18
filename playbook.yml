@@ -49,6 +49,10 @@
     command: snap install docker
     become: yes
 
+  - name: slack
+    command: snap install --classic slack
+    become: yes
+
   - name: golang
     homebrew:
       name: go
