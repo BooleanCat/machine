@@ -112,8 +112,6 @@
     git:
       repo: https://github.com/luan/vimfiles.git
       dest: ~/.vim
-  - name: 'vim: configure'
-    command: ~/.vim/update
   - name: 'vim: install neovim'
     homebrew:
       name: neovim
@@ -123,7 +121,14 @@
     pip:
       name: neovim
       state: latest
-
+  - name: 'vim: plugins'
+    file:
+      src: "{{ ansible_env.PWD }}/config/.vimrc.local.plugins"
+      path: ~/.vimrc.local.plugins
+      state: link
+      force: yes
+  - name: 'vim: configure'
+    command: ~/.vim/update
   - name: ripgrep
     homebrew:
       name: ripgrep
@@ -142,14 +147,26 @@
       state: latest
     become: true
 
-  - name: setup symlinks
+  - name: tmux
+    apt:
+      name: tmux
+      state: latest
+      update_cache: yes
+    become: true
+  - name: 'tmux: config'
     file:
-      path: "{{item.target}}"
-      src: "{{item.src}}"
+      src: "{{ ansible_env.PWD }}/config/.tmux.conf"
+      path: ~/.tmux.conf
+      state: link
+      force: true
+  - name: 'tmux: tpm'
+    git:
+      repo: https://github.com/tmux-plugins/tpm
+      dest: ~/.tmux/plugins/tpm
+
+  - name: 'git: config'
+    file:
+      path: ~/.gitconfig
+      src: "{{ ansible_env.PWD }}/config/.gitconfig"
       state: link
       force: yes
-    with_items:
-    - src: "{{ansible_env.PWD}}/config/.tmux.conf"
-      target: "~/.tmux.conf"
-    - src: "{{ansible_env.PWD}}/config/.gitconfig"
-      target: "~/.gitconfig"
