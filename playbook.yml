@@ -136,6 +136,12 @@
       state: latest
       update_homebrew: true
 
+  - name: hfsprogs
+    apt:
+      name: hfsprogs
+      state: latest
+    become: true
+
   - name: setup symlinks
     file:
       path: "{{item.target}}"
