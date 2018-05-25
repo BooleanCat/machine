@@ -53,6 +53,10 @@
     command: snap install --classic slack
     become: yes
 
+  - name: discord
+    command: snap install discord
+    become: yes
+
   - name: golang
     homebrew:
       name: go
