@@ -147,6 +147,12 @@
       state: latest
     become: true
 
+  - name: 'netflix: codecs'
+    apt:
+      name: libavcodec-extra
+      state: latest
+    become: true
+
   - name: tmux
     apt:
       name: tmux
