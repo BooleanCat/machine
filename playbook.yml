@@ -71,11 +71,34 @@
     - 'GOPATH="${HOME}/go"'
     - 'PATH="${PATH}:${GOPATH}/bin"'
 
-  - name: rust
-    homebrew:
-      name: rust
-      state: latest
-      update_homebrew: yes
+  - name: 'rust: create tempdir'
+    tempfile:
+      state: directory
+    register: rust_temp
+  - name: 'rust: download rustup'
+    get_url:
+      url: "https://sh.rustup.rs"
+      dest: "{{ rust_temp.path }}/rustup"
+      mode: "0755"
+      force: yes
+  - name: 'rust: install rustup'
+    command: "{{ rust_temp.path }}/rustup -y --no-modify-path"
+  - name: 'rust: update rustup'
+    command: "~/.cargo/bin/rustup update"
+  - name: 'rust: install src'
+    command: "~/.cargo/bin/rustup component add rust-src"
+  - name: 'rust: env vars'
+    lineinfile:
+      path: ~/.bashrc
+      state: present
+      line: "export {{ item }}"
+    with_items:
+    - 'PATH="~/.cargo/bin:${PATH}"'
+    - 'RUST_SRC_PATH="$( ~/.cargo/bin/rustc --print sysroot )/lib/rustlib/src/rust/src"'
+  - name: 'rust: remove tempdir'
+    file:
+      path: "{{  rust_temp.path }}"
+      state: absent
 
   - name: pyenv
     homebrew:
