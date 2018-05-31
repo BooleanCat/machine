@@ -203,3 +203,9 @@
       src: "{{ ansible_env.PWD }}/config/.gitconfig"
       state: link
       force: yes
+
+  - name: 'scripts: update PATH'
+    lineinfile:
+      state: present
+      path: ~/.bashrc
+      line: 'export PATH="{{ ansible_env.PWD }}/bin:${PATH}"'

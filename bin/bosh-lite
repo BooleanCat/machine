@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+state_dir="${HOME}/.bosh-lite"
+
+mkdir -p "$state_dir"
+
+action="$1"
+
+echo "${action}-env"
+bosh "${action}-env" ~/workspace/bosh-deployment/bosh.yml \
+  --state "${state_dir}/state.json" \
+  -o ~/workspace/bosh-deployment/virtualbox/cpi.yml \
+  -o ~/workspace/bosh-deployment/virtualbox/outbound-network.yml \
+  -o ~/workspace/bosh-deployment/bosh-lite.yml \
+  -o ~/workspace/bosh-deployment/bosh-lite-runc.yml \
+  -o ~/workspace/bosh-deployment/jumpbox-user.yml \
+  --vars-store "${state_dir}/creds.yml" \
+  -v director_name="Bosh Lite Director" \
+  -v internal_ip=192.168.50.6 \
+  -v internal_gw=192.168.50.1 \
+  -v internal_cidr=192.168.50.0/24 \
+  -v outbound_network_name=NatNetwork
+
+if [ "$action" = create ]; then
+  cat > "${state_dir}/bosh-env" << EOF
+export BOSH_CLIENT=admin
+export BOSH_CLIENT_SECRET="$( bosh int "${state_dir}/creds.yml" --path /admin_password )"
+export BOSH_CA_CERT="$( bosh int "${state_dir}/creds.yml" --path /director_ssl/ca )"
+export BOSH_ENVIRONMENT=192.168.50.6
+unset BOSH_GW_HOST
+EOF
+
+  echo "now run:"
+  echo "1. source ${state_dir}/bosh-env"
+  echo "2. ip route add 10.244.0.0/16 via 192.168.50.6"
+fi
