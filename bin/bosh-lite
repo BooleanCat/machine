@@ -23,13 +23,25 @@ bosh "${action}-env" ~/workspace/bosh-deployment/bosh.yml \
   -v outbound_network_name=NatNetwork
 
 if [ "$action" = create ]; then
+  bosh_client=admin
+  bosh_client_secret="$( bosh int "${state_dir}/creds.yml" --path /admin_password )"
+  bosh_ca_cert="$( bosh int "${state_dir}/creds.yml" --path /director_ssl/ca )"
+  bosh_environment="192.168.50.6"
+
   cat > "${state_dir}/bosh-env" << EOF
-export BOSH_CLIENT=admin
-export BOSH_CLIENT_SECRET="$( bosh int "${state_dir}/creds.yml" --path /admin_password )"
-export BOSH_CA_CERT="$( bosh int "${state_dir}/creds.yml" --path /director_ssl/ca )"
-export BOSH_ENVIRONMENT=192.168.50.6
+export BOSH_CLIENT="$bosh_client"
+export BOSH_CLIENT_SECRET="$bosh_client_secret"
+export BOSH_CA_CERT="$bosh_ca_cert"
+export BOSH_ENVIRONMENT="$bosh_environment"
 unset BOSH_GW_HOST
 EOF
+
+  BOSH_CA_CERT="$bosh_ca_cert" \
+  bosh -n \
+    -e "$bosh_environment" \
+    --client "$bosh_client" \
+    --client-secret "$bosh_client_secret" \
+    update-cloud-config ~/workspace/bosh-deployment/warden/cloud-config.yml
 
   echo "now run:"
   echo "1. source ${state_dir}/bosh-env"
