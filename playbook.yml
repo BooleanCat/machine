@@ -49,10 +49,6 @@
     command: snap install docker
     become: yes
 
-  - name: slack
-    command: snap install --classic slack
-    become: yes
-
   - name: discord
     command: snap install discord
     become: yes
