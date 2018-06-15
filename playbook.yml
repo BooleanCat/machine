@@ -25,34 +25,6 @@
       state: present
       line: 'export PATH="/home/linuxbrew/.linuxbrew/bin:${PATH}"'
 
-  - name: 'snapd'
-    apt:
-      name: snapd
-      update_cache: yes
-    become: yes
-
-  - name: spotify
-    command: snap install spotify
-    become: yes
-
-  - name: 'atom: editor'
-    command: snap install --classic atom
-    become: yes
-  - name: 'atom: plugins'
-    command: apm install minimap
-
-  - name: chromium
-    command: snap install chromium
-    become: yes
-
-  - name: docker
-    command: snap install docker
-    become: yes
-
-  - name: discord
-    command: snap install discord
-    become: yes
-
   - name: golang
     homebrew:
       name: go
