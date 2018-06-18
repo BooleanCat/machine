@@ -1,13 +1,15 @@
 ---
 - hosts: all
   tasks:
-  - name: clone bash-it
+  - name: 'bash-it: clone'
     git:
       repo: https://github.com/Bash-it/bash-it.git
       dest: ~/.bash_it
-  - name: install bash-it
+    register: bashitclone
+  - name: 'bash-it: install'
     command: ~/.bash_it/install.sh --silent
-  - name: apply bash-it theme
+    when: bashitclone.changed
+  - name: 'bash-it: theme'
     replace:
       path: ~/.bashrc
       regexp: "export BASH_IT_THEME='bobby'"
