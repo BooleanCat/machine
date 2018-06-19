@@ -109,23 +109,29 @@
     git:
       repo: https://github.com/luan/vimfiles.git
       dest: ~/.vim
+    register: vimclone
   - name: 'vim: install neovim'
     homebrew:
       name: neovim
       state: latest
       update_homebrew: yes
+    register: vimneovim
   - name: 'vim: install neovim pip'
     pip:
       name: neovim
       state: latest
+    register: vimpip
   - name: 'vim: plugins'
     file:
       src: "{{ ansible_env.PWD }}/config/.vimrc.local.plugins"
       path: ~/.vimrc.local.plugins
       state: link
       force: yes
+    register: vimplugins
   - name: 'vim: configure'
     command: ~/.vim/update
+    when: vimclone.changed or vimneovim.changed or vimpip.changed or vimplugins.changed
+
   - name: ripgrep
     homebrew:
       name: ripgrep
