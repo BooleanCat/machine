@@ -27,6 +27,16 @@
       state: present
       line: 'export PATH="/home/linuxbrew/.linuxbrew/bin:${PATH}"'
 
+  - name: 'atom: repository'
+    apt_repository:
+      repo: ppa:webupd8team/atom
+    become: yes
+  - name: 'atom: install'
+    apt:
+      name: atom
+      update_cache: yes
+    become: yes
+
   - name: golang
     homebrew:
       name: go
