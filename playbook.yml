@@ -141,6 +141,11 @@
   - name: 'vim: configure'
     command: ~/.vim/update
     when: vimclone.changed or vimneovim.changed or vimpip.changed or vimplugins.changed
+  - name: 'vim: editor'
+    lineinfile:
+      path: ~/.bashrc
+      state: present
+      line: 'export EDITOR=vim'
 
   - name: ripgrep
     homebrew:
