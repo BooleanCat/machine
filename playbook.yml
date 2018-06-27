@@ -158,6 +158,11 @@
       name: direnv
       state: latest
       update_homebrew: true
+  - name: 'direnv: setup'
+    lineinfile:
+      path: ~/.bashrc
+      state: present
+      line: 'eval "$(direnv hook bash)"'
 
   - name: hfsprogs
     apt:
@@ -200,3 +205,9 @@
       state: present
       path: ~/.bashrc
       line: 'export PATH="{{ ansible_env.PWD }}/bin:${PATH}"'
+
+  - name: aliases
+    lineinfile:
+      path: ~/.bashrc
+      state: present
+      line: 'alias bosh-lite-env="source ~/.bosh-lite/bosh-env"'
