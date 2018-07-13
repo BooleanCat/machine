@@ -146,15 +146,6 @@
       path: ~/.bashrc
       state: present
       line: 'export EDITOR=vim'
-  # TODO: remove this once Luan removes nvim-completion-manager from luanvim
-  - name: 'vim: patch nvim-completion-manager'
-    replace:
-      path: "{{ item }}"
-      regexp: "async=True"
-      replace: '**{"async": True}'
-    with_items:
-    - "~/.vim/plugged/nvim-completion-manager/pythonx/cm.py"
-    - "~/.vim/plugged/nvim-completion-manager/pythonx/cm_core.py"
 
   - name: ripgrep
     homebrew:
