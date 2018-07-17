@@ -51,6 +51,12 @@
     - 'GOPATH="${HOME}/go"'
     - 'PATH="${PATH}:${GOPATH}/bin"'
 
+  - name: haskell
+    apt:
+      name: haskell-platform
+      update_cache: yes
+    become: yes
+
   - name: 'rust: create tempdir'
     tempfile:
       state: directory
