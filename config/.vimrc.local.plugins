@@ -1,1 +1,3 @@
 Plug 'christoomey/vim-tmux-navigator'
+Plug 'roxma/nvim-yarp'
+Plug 'neovimhaskell/haskell-vim'
