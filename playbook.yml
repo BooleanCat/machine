@@ -47,17 +47,17 @@
   - name: 'go: download'
     get_url:
       url: 'https://dl.google.com/go/go1.11.linux-amd64.tar.gz'
-      dest: '~/Downloads/go1.11.linux-amd64.tar.gz'
+      dest: '/tmp/go1.11.linux-amd64.tar.gz'
     when: go_version.changed
   - name: 'go: install'
     unarchive:
-      src: '~/Downloads/go1.11.linux-amd64.tar.gz'
+      src: '/tmp/go1.11.linux-amd64.tar.gz'
       dest: '/usr/local'
     when: go_version.changed
     become: yes
   - name: 'go: remove download'
     file:
-      path: '~/Downloads/go1.11.linux-amd64.tar.gz'
+      path: '/tmp/go1.11.linux-amd64.tar.gz'
       state: absent
 
   - name: haskell
@@ -86,16 +86,16 @@
   - name: 'rust: download rustup'
     get_url:
       url: "https://sh.rustup.rs"
-      dest: "~/Downloads/rustup"
+      dest: "/tmp/rustup"
       mode: "0755"
       force: yes
     when: rustup_version.changed
   - name: 'rust: install rustup'
-    command: "~/Downloads/rustup -y --no-modify-path"
+    command: "/tmp/rustup -y --no-modify-path"
     when: rustup_version.changed
   - name: 'rust: remove rustup download'
     file:
-      path: '~/Downloads/rustup'
+      path: '/tmp/rustup'
       state: absent
   - name: 'rust: update'
     command: "~/.cargo/bin/rustup update"
@@ -166,6 +166,15 @@
       path: ~/.bashrc
       state: present
       line: 'export EDITOR=vim'
+  - name: 'vim: dependencies'
+    apt:
+      name: '{{ item }}'
+      update_cache: yes
+    become: yes
+    with_items:
+    - python3
+    - python3-pip
+    - cmake
   - name: 'vim: configure'
     command: ~/.vim/update
     when: vim_config.changed
