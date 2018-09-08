@@ -38,27 +38,9 @@
     shell: 'if command -v /usr/local/go/bin/go; then /usr/local/go/bin/go version; fi'
     register: go_version
     changed_when: go_version.stdout == ''
-  - name: 'go: remove'
-    file:
-      path: /usr/local/go
-      state: absent
-    become: yes
-    when: go_version.changed
-  - name: 'go: download'
-    get_url:
-      url: 'https://dl.google.com/go/go1.11.linux-amd64.tar.gz'
-      dest: '/tmp/go1.11.linux-amd64.tar.gz'
-    when: go_version.changed
   - name: 'go: install'
-    unarchive:
-      src: '/tmp/go1.11.linux-amd64.tar.gz'
-      dest: '/usr/local'
+    shell: '{{ ansible_env.PWD }}/installers/go.sh'
     when: go_version.changed
-    become: yes
-  - name: 'go: remove download'
-    file:
-      path: '/tmp/go1.11.linux-amd64.tar.gz'
-      state: absent
 
   - name: haskell
     apt:
