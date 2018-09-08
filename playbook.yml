@@ -102,6 +102,31 @@
     register: rustup_update
     changed_when: "'unchanged' not in rustup_update.stdout"
 
+  - name: 'lua: env'
+    lineinfile:
+      path: ~/.bashrc
+      state: present
+      line: 'export PATH="~/.luarocks/bin:~/.lua/bin:${PATH}"'
+  - name: 'lua: check'
+    shell: '~/.lua/bin/lua -v || true'
+    register: lua_version
+    changed_when: '"Lua 5.3.5" not in lua_version.stdout'
+  - name: 'lua: install'
+    shell: '{{ ansible_env.PWD }}/installers/lua.sh'
+    when: lua_version.changed
+  - name: 'luarocks: check'
+    shell: '~/.luarocks/bin/luarocks --version || true'
+    register: luarocks_version
+    changed_when: '"3.0.2" not in luarocks_version.stdout'
+  - name: 'lua: install luarocks'
+    shell: '{{ ansible_env.PWD }}/installers/luarocks.sh'
+    when: luarocks_version.changed
+  - name: 'lua: luarocks env'
+    lineinfile:
+      path: ~/.bashrc
+      state: present
+      line: 'eval "$( luarocks path --no-bin )"'
+
   - name: 'python: env'
     lineinfile:
       path: ~/.bashrc
