@@ -13,7 +13,6 @@
     replace:
       path: ~/.bashrc
       regexp: "export BASH_IT_THEME='bobby'"
-      backup: "yes"
       replace: "export BASH_IT_THEME='minimal'"
 
   - name: 'atom: repository'
