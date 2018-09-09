@@ -26,6 +26,11 @@
       update_cache: yes
     become: yes
 
+  - name: 'go: dependencies'
+    apt:
+      name: curl
+      update_cache: yes
+    become: yes
   - name: 'go: env'
     lineinfile:
       path: ~/.bashrc
@@ -84,6 +89,14 @@
     register: rustup_update
     changed_when: "'unchanged' not in rustup_update.stdout"
 
+  - name: 'lua: dependencies'
+    apt:
+      name: '{{ item }}'
+      update_cache: yes
+    become: yes
+    with_items:
+    - build-essential
+    - libreadline-dev
   - name: 'lua: env'
     lineinfile:
       path: ~/.bashrc
