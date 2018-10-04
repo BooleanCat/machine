@@ -96,6 +96,7 @@
     with_items:
     - build-essential
     - libreadline-dev
+    - unzip
   - name: 'lua: env'
     lineinfile:
       path: ~/.bashrc
