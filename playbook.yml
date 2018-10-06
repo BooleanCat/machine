@@ -225,6 +225,20 @@
       update_cache: yes
     become: true
 
+  - name: lastpass
+    apt:
+      name: lastpass-cli
+      state: latest
+      update_cache: true
+    become: true
+
+  - name: xclip
+    apt:
+      name: xclip
+      state: latest
+      update_cache: true
+    become: true
+
   - name: hfsprogs
     apt:
       name: hfsprogs
