@@ -281,9 +281,3 @@
       state: present
       path: ~/.bashrc
       line: 'export PATH="{{ ansible_env.PWD }}/bin:${PATH}"'
-
-  - name: aliases
-    lineinfile:
-      path: ~/.bashrc
-      state: present
-      line: 'alias bosh-lite-env="source ~/.bosh-lite/bosh-env"'
