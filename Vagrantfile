@@ -73,6 +73,9 @@ Vagrant.configure("2") do |config|
     apt update
     apt upgrade -y
     cd ~/workspace/machine
+    chmod +rx converge.sh
+    ls installers | xargs -I{} chmod +rx installers/{}
+    ls bin | xargs -I{} chmod +rx bin/{}
     ./converge.sh
   SHELL
 end
