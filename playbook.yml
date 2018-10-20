@@ -15,16 +15,6 @@
       regexp: "export BASH_IT_THEME='bobby'"
       replace: "export BASH_IT_THEME='minimal'"
 
-  - name: 'atom: repository'
-    apt_repository:
-      repo: ppa:webupd8team/atom
-    become: yes
-  - name: 'atom: install'
-    apt:
-      name: atom
-      update_cache: yes
-    become: yes
-
   - name: 'go: dependencies'
     apt:
       name: curl
