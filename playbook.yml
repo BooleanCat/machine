@@ -151,10 +151,6 @@
       repo: https://github.com/luan/vimfiles.git
       dest: ~/.vim
     register: vim_config
-  - name: 'vim: neovim repository'
-    apt_repository:
-      repo: ppa:neovim-ppa/stable
-    become: yes
   - name: 'vim: neovim'
     apt:
       name: neovim
