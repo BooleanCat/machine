@@ -41,11 +41,6 @@
       name: haskell-platform
       update_cache: yes
     become: yes
-  - name: 'haskell: stack'
-    apt:
-      name: haskell-stack
-      update_cache: yes
-    become: yes
 
   - name: 'rust: env'
     lineinfile:
