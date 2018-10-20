@@ -206,6 +206,13 @@
       update_cache: yes
     become: true
 
+  - name: 'ssh-askpass'
+    apt:
+      name: ssh-askpass
+      state: latest
+      update_cache: true
+    become: true
+
   - name: lastpass
     apt:
       name: lastpass-cli
