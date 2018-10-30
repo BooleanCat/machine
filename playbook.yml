@@ -211,6 +211,13 @@
       force: yes
     when: bosh_check.changed
 
+  - name: virtualbox
+    apt:
+      name: virtualbox
+      state: latest
+      update_cache: yes
+    become: true
+
   - name: direnv
     apt:
       name: direnv
