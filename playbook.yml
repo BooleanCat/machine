@@ -199,6 +199,18 @@
       path: '/tmp/ripgrep_0.9.0_amd64.deb'
       state: absent
 
+  - name: 'bosh: check'
+    shell: 'if command -v bosh; then bosh -v || true; fi'
+    register: bosh_check
+    changed_when: "'5.3.1' not in bosh_check.stdout"
+  - name: 'bosh: download'
+    get_url:
+      url: 'https://github.com/cloudfoundry/bosh-cli/releases/download/v5.3.1/bosh-cli-5.3.1-linux-amd64'
+      dest: ~/bin/bosh
+      mode: 0755
+      force: yes
+    when: bosh_check.changed
+
   - name: direnv
     apt:
       name: direnv
