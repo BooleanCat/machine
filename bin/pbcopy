@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cat "$1" | xclip -i -selection clipboard
+if [ -p /dev/stdin ]; then
+  cat | xclip -i -selection clipboard
+else
+  echo -n "$1" | xclip -i -selection clipboard
+fi
+
