@@ -199,6 +199,26 @@
       path: '/tmp/ripgrep_0.9.0_amd64.deb'
       state: absent
 
+  - name: 'bosh: dependencies'
+    apt:
+      name: '{{ item }}'
+      state: latest
+      update_cache: yes
+    with_items:
+    - build-essential
+    - zlibc
+    - zlib1g-dev
+    - ruby
+    - ruby-dev
+    - openssl
+    - libxslt-dev
+    - libxml2-dev
+    - libssl-dev
+    - libreadline6-dev
+    - libyaml-dev
+    - libsqlite3-dev
+    - sqlite3
+    become: true
   - name: 'bosh: check'
     shell: 'if command -v bosh; then bosh -v || true; fi'
     register: bosh_check
