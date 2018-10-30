@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+function bosh_lite() {
+  action="$1"
+
+  mkdir -p ~/.bosh-lite-state
+
+  bosh "${action}-env" \
+    ~/workspace/bosh-deployment/bosh.yml \
+    --state ~/.bosh-lite-state/state.json \
+    --vars-store ~/.bosh-lite-state/creds.yml \
+    -o ~/workspace/bosh-deployment/virtualbox/cpi.yml \
+    -o ~/workspace/bosh-deployment/virtualbox/outbound-network.yml \
+    -o ~/workspace/bosh-deployment/bosh-lite.yml \
+    -o ~/workspace/bosh-deployment/jumpbox-user.yml \
+    -v director_name=vbox \
+    -v internal_ip=192.168.56.6 \
+    -v internal_gw=192.168.56.1 \
+    -v internal_cidr=192.168.56.0/24 \
+    -v network_name=vboxnet0 \
+    -v outbound_network_name=NatNetwork
+}
+
+function bosh_lite_env() {
+  bosh int ~/.bosh-lite-state/creds.yml --path /director_ssl/ca > ~/.bosh-lite-state/ca.crt
+
+  cat <<EOF
+export BOSH_CLIENT=admin
+export BOSH_CLIENT_SECRET="$( bosh int ~/.bosh-lite-state/creds.yml --path /admin_password )"
+export BOSH_ENVIRONMENT=192.168.56.6
+export BOSH_CA_CERT=~/.bosh-lite-state/ca.crt
+EOF
+}
+
+function usage() {
+  cat <<EOF
+USAGE:
+  bosh-lite {create|delete|env}
+
+NOTES:
+  Use "source <( bosh-lite env )" to export director environment variables.
+EOF
+}
+
+case "$1" in
+  create|c)
+    bosh_lite create
+  ;;
+
+  delete|d)
+    bosh_lite delete
+  ;;
+
+  env|e)
+    bosh_lite_env
+  ;;
+
+  help|h)
+    usage
+  ;;
+
+  *)
+    usage 1>&2
+    exit 1
+  ;;
+esac
