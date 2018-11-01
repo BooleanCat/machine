@@ -1,25 +1,32 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+bosh_deployment="${HOME}/workspace/bosh-deployment"
+
 function bosh_lite() {
   action="$1"
 
   mkdir -p ~/.bosh-lite-state
 
   bosh "${action}-env" \
-    ~/workspace/bosh-deployment/bosh.yml \
+    "${bosh_deployment}/bosh.yml" \
     --state ~/.bosh-lite-state/state.json \
     --vars-store ~/.bosh-lite-state/creds.yml \
-    -o ~/workspace/bosh-deployment/virtualbox/cpi.yml \
-    -o ~/workspace/bosh-deployment/virtualbox/outbound-network.yml \
-    -o ~/workspace/bosh-deployment/bosh-lite.yml \
-    -o ~/workspace/bosh-deployment/jumpbox-user.yml \
+    -o "${bosh_deployment}/virtualbox/cpi.yml" \
+    -o "${bosh_deployment}/virtualbox/outbound-network.yml" \
+    -o "${bosh_deployment}/bosh-lite.yml" \
+    -o "${bosh_deployment}/jumpbox-user.yml" \
     -v director_name=vbox \
     -v internal_ip=192.168.56.6 \
     -v internal_gw=192.168.56.1 \
     -v internal_cidr=192.168.56.0/24 \
     -v network_name=vboxnet0 \
     -v outbound_network_name=NatNetwork
+
+  if [ "$action" == "create" ]; then
+    source <( bosh_lite_env )
+    bosh -n update-cloud-config "${bosh_deployment}/warden/cloud-config.yml"
+  fi
 }
 
 function bosh_lite_env() {
