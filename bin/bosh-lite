@@ -43,7 +43,7 @@ EOF
 function usage() {
   cat <<EOF
 USAGE:
-  bosh-lite {create|delete|env}
+  bosh-lite {create|delete|env|route}
 
 NOTES:
   Use "source <( bosh-lite env )" to export director environment variables.
@@ -61,6 +61,10 @@ case "$1" in
 
   env|e)
     bosh_lite_env
+  ;;
+
+  route|r)
+    sudo ip route add 10.244.0.0/16 via 192.168.56.6
   ;;
 
   help|h)
