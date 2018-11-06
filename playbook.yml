@@ -1,5 +1,9 @@
 ---
 - hosts: all
+  vars:
+    go_version: 1.11.2
+    lua_version: 5.3.5
+    luarocks_version: 3.0.4
   tasks:
   - name: 'bash-it: clone'
     git:
@@ -30,11 +34,11 @@
     - 'PATH="${PATH}:${GOPATH}/bin:/usr/local/go/bin"'
   - name: 'go: check'
     shell: 'if command -v /usr/local/go/bin/go; then /usr/local/go/bin/go version; fi'
-    register: go_version
-    changed_when: go_version.stdout == ''
+    register: go_check
+    changed_when: go_version not in go_check.stdout
   - name: 'go: install'
-    shell: '{{ ansible_env.PWD }}/installers/go.sh'
-    when: go_version.changed
+    shell: '{{ ansible_env.PWD }}/installers/go.sh {{ go_version }}'
+    when: go_check.changed
 
   - name: haskell
     apt:
@@ -89,18 +93,18 @@
       line: 'export PATH="~/.luarocks/bin:~/.lua/bin:${PATH}"'
   - name: 'lua: check'
     shell: '~/.lua/bin/lua -v || true'
-    register: lua_version
-    changed_when: '"Lua 5.3.5" not in lua_version.stdout'
+    register: lua_check
+    changed_when: 'lua_version not in lua_check.stdout'
   - name: 'lua: install'
-    shell: '{{ ansible_env.PWD }}/installers/lua.sh'
-    when: lua_version.changed
+    shell: '{{ ansible_env.PWD }}/installers/lua.sh {{ lua_version }}'
+    when: lua_check.changed
   - name: 'luarocks: check'
     shell: '~/.luarocks/bin/luarocks --version || true'
-    register: luarocks_version
-    changed_when: '"3.0.2" not in luarocks_version.stdout'
+    register: luarocks_check
+    changed_when: 'luarocks_version not in luarocks_check.stdout'
   - name: 'lua: install luarocks'
-    shell: '{{ ansible_env.PWD }}/installers/luarocks.sh'
-    when: luarocks_version.changed
+    shell: '{{ ansible_env.PWD }}/installers/luarocks.sh {{ luarocks_version }}'
+    when: luarocks_check.changed
   - name: 'lua: luarocks env'
     lineinfile:
       path: ~/.bashrc

@@ -8,7 +8,7 @@ function rm_if_exists() {
   fi
 }
 
-go_version="go1.11.2.linux-amd64"
+go_version="go${1}.linux-amd64"
 
 rm_if_exists /usr/local/go
 rm_if_exists "/tmp/${go_version}.tar.gz"

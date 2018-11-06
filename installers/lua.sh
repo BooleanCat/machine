@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-lua_version="lua-5.3.5"
+lua_version="lua-${1}"
 
 function rm_if_exists() {
   path="$1"

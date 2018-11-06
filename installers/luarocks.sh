@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-luarocks_version="luarocks-3.0.2"
+luarocks_version="luarocks-${1}"
 
 function rm_if_exists() {
   path="$1"
