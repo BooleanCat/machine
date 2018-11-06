@@ -1,6 +1,5 @@
-[user]
-	name = Tom Godkin
-	email = thgodkin@gmail.com
+[include]
+	path = ~/workspace/machine/config/.gituser
 
 [alias]
 	st = status

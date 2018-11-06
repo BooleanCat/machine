@@ -297,11 +297,12 @@
       dest: ~/.tmux/plugins/tpm
 
   - name: 'git: config'
-    file:
+    ini_file:
       path: ~/.gitconfig
-      src: "{{ ansible_env.PWD }}/config/.gitconfig"
-      state: link
-      force: yes
+      create: true
+      section: include
+      option: path
+      value: '~/workspace/machine/config/.gitconfig'
 
   - name: 'scripts: update PATH'
     lineinfile:
