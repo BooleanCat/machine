@@ -1,6 +1,3 @@
-[include]
-	path = ~/workspace/machine/config/.gituser
-
 [alias]
 	st = status
 	co = checkout
