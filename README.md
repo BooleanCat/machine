@@ -3,7 +3,7 @@
 This repo contains scripts and configuration for an opinionated Linux
 development environment. Tooling here can be used to either converge the state
 of an existing Ubuntu 18.10 machine or to create a virtual development
-environment using vagrant. See installation instruction for these two options.
+environment using vagrant. See installation instructions for these two options.
 
 ## Installation (virtualbox)
 
@@ -13,7 +13,7 @@ $ vagrant up
 $ vagrant reload
 ```
 
-In order to properly configure vim you made need to, once on the machine, run
+In order to properly configure vim you will need to, on the machine, run
 `~/workspace/.vim/update`.
 
 ## Installation (fresh ubuntu 18.10 machine)
@@ -26,6 +26,9 @@ $ cd ~/workspace/machine
 $ ./converge.sh
 ```
 
+In order to properly configure vim you will need to run
+`~/workspace/.vim/update`.
+
 ## Updating
 
 The provisioning script can be rerun by invoking `machine-update` from the VM
@@ -34,7 +37,7 @@ latest `machine` changes from git before doing this.
 
 ## Notes
 
-The developments experience laid out here is focused around vim. Specifically
+The development experience laid out here is focused around vim. Specifically
 the luanvim config is used, along with tmux integration with vim-panes. The
 usual tmux pane transition shortcuts will treat embedded vim panes like tmux
 panes.
