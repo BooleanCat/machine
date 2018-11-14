@@ -31,6 +31,8 @@ function bosh_lite() {
 
 function bosh_lite_env() {
   bosh int ~/.bosh-lite-state/creds.yml --path /director_ssl/ca > ~/.bosh-lite-state/ca.crt
+  bosh int ~/.bosh-lite-state/creds.yml --path /jumpbox_ssh/private_key > ~/.bosh-lite-state/jumpbox.key
+  chmod 600 ~/.bosh-lite-state/jumpbox.key
 
   cat <<EOF
 export BOSH_CLIENT=admin
