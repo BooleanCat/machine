@@ -237,6 +237,17 @@
       force: yes
     when: bosh_check.changed
 
+  - name: 'container dev dependencies'
+    apt:
+      name: '{{ item }}'
+      state: latest
+      update_cache: yes
+    become: true
+    with_items:
+    - libseccomp-dev
+    - libcap-dev
+    - libcap-ng-utils
+
   - name: virtualbox
     apt:
       name: virtualbox
