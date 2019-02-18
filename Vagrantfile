@@ -68,7 +68,17 @@ Vagrant.configure("2") do |config|
     sudo apt upgrade -y
     rm -rf ~/workspace/machine
   SHELL
-  config.vm.provision "file", source: "~/workspace/machine", destination: "~/workspace/machine"
+
+  # -----------------------------------------------------------------
+  # workaround for https://github.com/hashicorp/vagrant/issues/10675
+  config.vm.provision "shell", privileged: false, keep_color: true, inline: <<-SHELL
+    sudo apt install git
+    mkdir -p ~/workspace
+    git clone https://github.com/BooleanCat/machine.git ~/workspace/machine
+  SHELL
+  # config.vm.provision "file", source: "~/workspace/machine/*", destination: "~/workspace/machine"
+  # -----------------------------------------------------------------
+
   config.vm.provision "shell", privileged: false, keep_color: true, inline: <<-SHELL
     apt update
     apt upgrade -y
