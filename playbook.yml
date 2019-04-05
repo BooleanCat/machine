@@ -2,60 +2,82 @@
 - hosts: all
   vars:
     go_version: '1.12.1'
-    lua_version: 5.3.5
-    luarocks_version: 3.0.4
-    ripgrep_version: 0.10.0
-    bosh_cli_version: 5.4.0
+    lua_version: '5.3.5'
+    luarocks_version: '3.0.4'
+    ripgrep_version: '0.10.0'
+    bosh_cli_version: '5.4.0'
   tasks:
-  - name: 'bash-it: clone'
-    git:
-      repo: https://github.com/Bash-it/bash-it.git
-      dest: ~/.bash_it
-    register: bashitclone
-  - name: 'bash-it: install'
-    command: ~/.bash_it/install.sh --silent
-    when: bashitclone.changed
-  - name: 'bash-it: theme'
-    replace:
-      path: ~/.bashrc
-      regexp: "export BASH_IT_THEME='bobby'"
-      replace: "export BASH_IT_THEME='minimal'"
-
-  - name: 'go: dependencies'
+  - name: 'fish: repository'
+    apt_repository:
+      repo: 'ppa:fish-shell/release-3'
+    become: true
+  - name: 'fish'
     apt:
-      name: curl
-      update_cache: yes
-    become: yes
-  - name: 'go: env'
+      name: 'fish'
+      update_cache: true
+    become: true
+  - name: 'fish: chsh'
+    user:
+      name: '{{ ansible_user_id }}'
+      shell: '/usr/bin/fish'
+    become: true
+  - name: 'oh-my-fish'
+    shell: '{{ ansible_env.PWD }}/installers/oh-my-fish.bash'
+    register: 'oh_my_fish_install'
+    changed_when: '"bcm-already-installed" not in oh_my_fish_install.stdout'
+  - name: 'oh-my-fish: update'
+    shell: 'omf update'
+    args:
+      executable: '/usr/bin/fish'
+    register: 'oh_my_fish_update'
+    changed_when: '"already up-to-date" not in oh_my_fish_update.stdout'
+  - name: 'oh-my-fish: theme'
+    shell: 'omf install clearance'
+    args:
+      executable: '/usr/bin/fish'
+    register: 'omf_theme_install'
+    changed_when: '"already installed" not in omf_theme_install.stderr'
+  - name: 'oh-my-fish: bass'
+    shell: 'omf install bass'
+    args:
+      executable: /usr/bin/fish
+    register: 'omf_bass_install'
+    changed_when: '"already installed" not in omf_bass_install.stderr'
+
+  - name: 'go: GOPATH'
     lineinfile:
-      path: ~/.bashrc
-      state: present
-      line: 'export {{ item }}'
-    with_items:
-    - 'GOPATH="${HOME}/go"'
-    - 'PATH="${PATH}:${GOPATH}/bin:/usr/local/go/bin"'
+      path: '~/.config/fish/config.fish'
+      line: 'set -Ux GOPATH ~/go'
+      create: true
+  - name: 'go: PATH'
+    lineinfile:
+      path: '~/.config/fish/config.fish'
+      line: 'set PATH /usr/local/go/bin $GOPATH/bin $PATH'
+      create: true
   - name: 'go: check'
     shell: 'if command -v /usr/local/go/bin/go; then /usr/local/go/bin/go version; fi'
     register: go_check
     changed_when: go_version not in go_check.stdout
   - name: 'go: install'
-    shell: '{{ ansible_env.PWD }}/installers/go.sh {{ go_version }}'
+    shell: '{{ ansible_env.PWD }}/installers/go.bash {{ go_version }}'
     when: go_check.changed
 
-  - name: haskell
+  - name: 'haskell'
     apt:
-      name: haskell-platform
-      update_cache: yes
-    become: yes
+      name: 'haskell-platform'
+      update_cache: true
+    become: true
 
-  - name: 'rust: env'
+  - name: 'rust: PATH'
     lineinfile:
-      path: ~/.bashrc
-      state: present
-      line: "export {{ item }}"
-    with_items:
-    - 'PATH="~/.cargo/bin:${PATH}"'
-    - 'RUST_SRC_PATH="$( ~/.cargo/bin/rustc --print sysroot )/lib/rustlib/src/rust/src"'
+      path: '~/.config/fish/config.fish'
+      line: 'set PATH ~/.cargo/bin $PATH'
+      create: true
+  - name: 'rust: RUST_SRC_PATH'
+    lineinfile:
+      path: '~/.config/fish/config.fish'
+      line: 'set -Ux RUST_SRC_PATH (rustc --print sysroot)/lib/rustlib/src/rust/src'
+      create: true
   - name: 'rust: check rustup'
     shell: 'if command -v ~/.cargo/bin/rustup; then ~/.cargo/bin/rustup -V; fi'
     register: rustup_version
@@ -65,7 +87,7 @@
       url: "https://sh.rustup.rs"
       dest: "/tmp/rustup"
       mode: "0755"
-      force: yes
+      force: true
     when: rustup_version.changed
   - name: 'rust: install rustup'
     command: "/tmp/rustup -y --no-modify-path"
@@ -82,52 +104,51 @@
   - name: 'lua: dependencies'
     apt:
       name: '{{ item }}'
-      update_cache: yes
-    become: yes
+      update_cache: true
+    become: true
     with_items:
     - build-essential
     - libreadline-dev
     - unzip
   - name: 'lua: env'
     lineinfile:
-      path: ~/.bashrc
-      state: present
-      line: 'export PATH="~/.luarocks/bin:~/.lua/bin:${PATH}"'
+      path: '~/.config/fish/config.fish'
+      line: 'set PATH ~/.luarocks/bin ~/.lua/bin $PATH'
+      create: true
   - name: 'lua: check'
     shell: '~/.lua/bin/lua -v || true'
     register: lua_check
     changed_when: 'lua_version not in lua_check.stdout'
   - name: 'lua: install'
-    shell: '{{ ansible_env.PWD }}/installers/lua.sh {{ lua_version }}'
+    shell: '{{ ansible_env.PWD }}/installers/lua.bash {{ lua_version }}'
     when: lua_check.changed
   - name: 'luarocks: check'
     shell: '~/.luarocks/bin/luarocks --version || true'
     register: luarocks_check
     changed_when: 'luarocks_version not in luarocks_check.stdout'
   - name: 'lua: install luarocks'
-    shell: '{{ ansible_env.PWD }}/installers/luarocks.sh {{ luarocks_version }}'
+    shell: '{{ ansible_env.PWD }}/installers/luarocks.bash {{ luarocks_version }}'
     when: luarocks_check.changed
   - name: 'lua: luarocks env'
     lineinfile:
-      path: ~/.bashrc
-      state: present
-      line: 'eval "$( luarocks path --no-bin )"'
+      path: '~/.config/fish/config.fish'
+      line: "bass eval '$( luarocks path --no-bin )'"
 
   - name: 'python: env'
     lineinfile:
-      path: ~/.bashrc
-      state: present
+      path: '~/.config/fish/config.fish'
       line: '{{ item }}'
+      create: true
     with_items:
-    - 'export PYENV_ROOT="$HOME/.pyenv"'
-    - 'export PATH="$PYENV_ROOT/bin:$PATH"'
-    - 'if command -v pyenv 1>/dev/null 2>&1; then eval "$(pyenv init -)"; fi'
-    - 'eval "$(pyenv virtualenv-init -)"'
+    - 'set -Ux PYENV_ROOT ~/.pyenv'
+    - 'set PATH $PYENV_ROOT/bin $PATH'
+    - 'pyenv init - | source'
+    - 'pyenv virtualenv-init - | source'
   - name: 'python: build dependencies'
     apt:
       name: "{{ item }}"
-      update_cache: yes
-    become: yes
+      update_cache: true
+    become: true
     with_items:
     - make
     - build-essential
@@ -145,46 +166,46 @@
     - tk-dev
   - name: 'python: pyenv'
     git:
-      repo: https://github.com/pyenv/pyenv.git
-      dest: ~/.pyenv
+      repo: 'https://github.com/pyenv/pyenv.git'
+      dest: '~/.pyenv'
   - name: 'python: pyenv virtualenv'
     git:
-      repo: https://github.com/pyenv/pyenv-virtualenv.git
-      dest: ~/.pyenv/plugins/pyenv-virtualenv
+      repo: 'https://github.com/pyenv/pyenv-virtualenv.git'
+      dest: '~/.pyenv/plugins/pyenv-virtualenv'
 
   - name: 'vim: config'
     git:
-      repo: https://github.com/luan/vimfiles.git
-      dest: ~/.vim
-    register: vim_config
+      repo: 'https://github.com/luan/vimfiles.git'
+      dest: '~/.vim'
+    register: 'vim_config'
   - name: 'vim: neovim'
     apt:
-      name: neovim
-      update_cache: yes
-    become: yes
+      name: 'neovim'
+      update_cache: true
+    become: true
   - name: 'vim: plugins'
     file:
       src: "{{ ansible_env.PWD }}/config/.vimrc.local.plugins"
-      path: ~/.vimrc.local.plugins
-      state: link
-      force: yes
+      path: '~/.vimrc.local.plugins'
+      state: 'link'
+      force: true
   - name: 'vim: editor'
     lineinfile:
-      path: ~/.bashrc
-      state: present
-      line: 'export EDITOR=vim'
+      path: '~/.config/fish/config.fish'
+      line: 'set -Ux EDITOR vim'
+      create: true
   - name: 'vim: dependencies'
     apt:
       name: '{{ item }}'
-      update_cache: yes
-    become: yes
+      update_cache: true
+    become: true
     with_items:
     - python3
     - python3-pip
     - cmake
   - name: 'vim: configure'
-    command: ~/.vim/update
-    when: vim_config.changed
+    command: '~/.vim/update'
+    when: 'vim_config.changed'
 
   - name: 'ripgrep: check'
     shell: 'if command -v rg; then rg -V || true; fi'
@@ -194,11 +215,11 @@
     get_url:
       url: 'https://github.com/BurntSushi/ripgrep/releases/download/{{ ripgrep_version }}/ripgrep_{{ ripgrep_version }}_amd64.deb'
       dest: '/tmp/ripgrep_{{ ripgrep_version }}_amd64.deb'
-      force: yes
+      force: true
     when: ripgrep_check.changed
   - name: 'ripgrep'
     shell: 'dpkg -i /tmp/ripgrep_{{ ripgrep_version }}_amd64.deb'
-    become: yes
+    become: true
     when: ripgrep_check.changed
   - name: 'ripgrep: cleanup'
     file:
@@ -232,34 +253,50 @@
   - name: 'bosh: download'
     get_url:
       url: 'https://github.com/cloudfoundry/bosh-cli/releases/download/v{{ bosh_cli_version }}/bosh-cli-{{ bosh_cli_version }}-linux-amd64'
-      dest: ~/bin/bosh
+      dest: '~/bin/bosh'
       mode: 0755
-      force: yes
+      force: true
     when: bosh_check.changed
 
   - name: 'container dev dependencies'
     apt:
       name: '{{ item }}'
       state: latest
-      update_cache: yes
+      update_cache: true
     become: true
     with_items:
     - libseccomp-dev
     - libcap-dev
     - libcap-ng-utils
 
-  - name: virtualbox
+  - name: 'virtualbox: key'
+    apt_key:
+      url: '{{ item }}'
+    with_items:
+    - https://www.virtualbox.org/download/oracle_vbox_2016.asc
+    - https://www.virtualbox.org/download/oracle_vbox.asc
+    become: true
+  - name: 'virtualbox: repository'
+    apt_repository:
+      repo: "deb [arch=amd64] http://download.virtualbox.org/virtualbox/debian cosmic contrib"
+    become: true
+  - name: 'virtualbox'
     apt:
-      name: virtualbox
-      state: latest
-      update_cache: yes
+      name: 'virtualbox-6.0'
+      state: 'latest'
+      update_cache: true
     become: true
 
-  - name: direnv
+  - name: 'direnv: env'
+    lineinfile:
+      path: '~/.config/fish/config.fish'
+      line: 'direnv hook fish | source'
+      create: true
+  - name: 'direnv'
     apt:
-      name: direnv
-      state: latest
-      update_cache: yes
+      name: 'direnv'
+      state: 'latest'
+      update_cache: true
     become: true
 
   - name: 'ssh-askpass'
@@ -287,42 +324,53 @@
     apt:
       name: hfsprogs
       state: latest
+      update_cache: true
     become: true
 
   - name: 'netflix: codecs'
     apt:
       name: libavcodec-extra
       state: latest
-      update_cache: yes
+      update_cache: true
     become: true
 
-  - name: tmux
+  - name: 'tmux'
     apt:
-      name: tmux
-      state: latest
-      update_cache: yes
+      name: 'tmux'
+      state: 'latest'
+      update_cache: true
     become: true
   - name: 'tmux: config'
     file:
       src: "{{ ansible_env.PWD }}/config/.tmux.conf"
-      path: ~/.tmux.conf
+      path: '~/.tmux.conf'
       state: link
       force: true
   - name: 'tmux: tpm'
     git:
-      repo: https://github.com/tmux-plugins/tpm
-      dest: ~/.tmux/plugins/tpm
+      repo: 'https://github.com/tmux-plugins/tpm'
+      dest: '~/.tmux/plugins/tpm'
 
   - name: 'git: config'
     ini_file:
-      path: ~/.gitconfig
+      path: '~/.gitconfig'
       create: true
-      section: include
-      option: path
+      section: 'include'
+      option: 'path'
       value: '~/workspace/machine/config/.gitconfig'
 
   - name: 'scripts: update PATH'
     lineinfile:
-      state: present
-      path: ~/.bashrc
-      line: 'export PATH="{{ ansible_env.PWD }}/bin:${PATH}"'
+      path: '~/.config/fish/config.fish'
+      line: 'set PATH {{ ansible_env.PWD }}/bin $PATH'
+
+  - name: 'greeting'
+    blockinfile:
+      path: '~/.config/fish/config.fish'
+      block: |
+        set -U fish_greeting "
+           ____ ___  ____ ______/ /_  (_)___  ___
+          / __ `__ \/ __ `/ ___/ __ \/ / __ \/ _ \\
+         / / / / / / /_/ / /__/ / / / / / / /  __/
+        /_/ /_/ /_/\__,_/\___/_/ /_/_/_/ /_/\___/"
+      create: true

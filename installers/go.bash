@@ -2,7 +2,8 @@
 set -euo pipefail
 
 function rm_if_exists() {
-  path="$1"
+  local path="$1"
+
   if [ -f "$path" ]; then
     rm -rf "$path"
   fi
