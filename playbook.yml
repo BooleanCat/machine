@@ -7,6 +7,11 @@
     ripgrep_version: '0.10.0'
     bosh_cli_version: '5.4.0'
   tasks:
+  - name: 'fish: dependencies'
+    apt:
+      name: 'curl'
+      update_cache: true
+    become: true
   - name: 'fish'
     apt:
       name: 'fish'
