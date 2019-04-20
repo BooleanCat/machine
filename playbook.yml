@@ -104,13 +104,10 @@
 
   - name: 'lua: dependencies'
     apt:
-      name: '{{ item }}'
+      name: ['build-essential', 'libreadline-dev', 'unzip']
       update_cache: true
+      state: latest
     become: true
-    with_items:
-    - build-essential
-    - libreadline-dev
-    - unzip
   - name: 'lua: env'
     lineinfile:
       path: '~/.config/fish/config.fish'
@@ -147,24 +144,24 @@
     - 'pyenv virtualenv-init - | source'
   - name: 'python: build dependencies'
     apt:
-      name: "{{ item }}"
+      name:
+      - make
+      - build-essential
+      - libssl-dev
+      - zlib1g-dev
+      - libbz2-dev
+      - libreadline-dev
+      - libsqlite3-dev
+      - wget
+      - curl
+      - llvm
+      - libncurses5-dev
+      - libncursesw5-dev
+      - xz-utils
+      - tk-dev
       update_cache: true
+      state: latest
     become: true
-    with_items:
-    - make
-    - build-essential
-    - libssl-dev
-    - zlib1g-dev
-    - libbz2-dev
-    - libreadline-dev
-    - libsqlite3-dev
-    - wget
-    - curl
-    - llvm
-    - libncurses5-dev
-    - libncursesw5-dev
-    - xz-utils
-    - tk-dev
   - name: 'python: pyenv'
     git:
       repo: 'https://github.com/pyenv/pyenv.git'
@@ -197,13 +194,10 @@
       create: true
   - name: 'vim: dependencies'
     apt:
-      name: '{{ item }}'
+      name: ['python3', 'python3-pip', 'cmake']
       update_cache: true
+      state: latest
     become: true
-    with_items:
-    - python3
-    - python3-pip
-    - cmake
   - name: 'vim: configure'
     command: '~/.vim/update'
     when: 'vim_config.changed'
@@ -229,23 +223,22 @@
 
   - name: 'bosh: dependencies'
     apt:
-      name: '{{ item }}'
+      name:
+      - build-essential
+      - zlibc
+      - zlib1g-dev
+      - ruby
+      - ruby-dev
+      - openssl
+      - libxslt-dev
+      - libxml2-dev
+      - libssl-dev
+      - libreadline6-dev
+      - libyaml-dev
+      - libsqlite3-dev
+      - sqlite3
       state: latest
       update_cache: yes
-    with_items:
-    - build-essential
-    - zlibc
-    - zlib1g-dev
-    - ruby
-    - ruby-dev
-    - openssl
-    - libxslt-dev
-    - libxml2-dev
-    - libssl-dev
-    - libreadline6-dev
-    - libyaml-dev
-    - libsqlite3-dev
-    - sqlite3
     become: true
   - name: 'bosh: check'
     shell: 'if command -v bosh; then bosh -v || true; fi'
@@ -261,14 +254,10 @@
 
   - name: 'container dev dependencies'
     apt:
-      name: '{{ item }}'
+      name: ['libseccomp-dev', 'libcap-dev', 'libcap-ng-utils']
       state: latest
       update_cache: true
     become: true
-    with_items:
-    - libseccomp-dev
-    - libcap-dev
-    - libcap-ng-utils
 
   - name: 'virtualbox: key'
     apt_key:
