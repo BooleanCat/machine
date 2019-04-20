@@ -7,10 +7,6 @@
     ripgrep_version: '0.10.0'
     bosh_cli_version: '5.4.0'
   tasks:
-  - name: 'fish: repository'
-    apt_repository:
-      repo: 'ppa:fish-shell/release-3'
-    become: true
   - name: 'fish'
     apt:
       name: 'fish'
