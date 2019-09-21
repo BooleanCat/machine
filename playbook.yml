@@ -1,0 +1,200 @@
+---
+- hosts: 'all'
+  vars:
+    config: '{{ ansible_env.PWD }}/config'
+    installers: '{{ ansible_env.PWD }}/installers'
+    tools: '{{ ansible_env.PWD }}/tools'
+  tasks:
+  - name: 'brew: env bash'
+    lineinfile:
+      path: '~/.bashrc'
+      line: 'eval "$( SHELL=/bin/bash /home/linuxbrew/.linuxbrew/bin/brew shellenv )"'
+      create: true
+  - name: 'brew: env fish'
+    lineinfile:
+      path: '~/.config/fish/config.fish'
+      line: 'eval (env SHELL=/home/linuxbrew/.linuxbrew/bin/fish /home/linuxbrew/.linuxbrew/bin/brew shellenv)'
+      create: true
+
+  - name: 'brew: update'
+    homebrew:
+      update_homebrew: true
+
+  - name: 'apt: update'
+    apt:
+      update_cache: true
+      force_apt_get: true
+    become: true
+
+  - name: 'fish'
+    homebrew:
+      name: 'fish'
+      state: 'latest'
+  - name: 'fish: shell'
+    user:
+      name: '{{ ansible_user_id }}'
+      shell: '/home/linuxbrew/.linuxbrew/bin/fish'
+    become: true
+  - name: 'fish: oh-my-fish'
+    shell: '{{ installers }}/omf.bash'
+    register: 'fish_omf'
+    changed_when: '"already installed" not in fish_omf.stdout'
+  - name: 'fish: oh-my-fish update'
+    shell: 'omf update'
+    args:
+      executable: 'fish'
+    register: 'omf_update'
+    changed_when: '"already up-to-date" not in omf_update.stdout'
+  - name: 'fish: oh-my-fish theme'
+    shell: 'omf install clearance'
+    args:
+      executable: 'fish'
+    register: 'omf_theme'
+    changed_when: '"already installed" not in omf_theme.stderr'
+  - name: 'fish: oh-my-fish bass'
+    shell: 'omf install bass'
+    args:
+      executable: 'fish'
+    register: 'omf_bass'
+    changed_when: '"already installed" not in omf_bass.stderr'
+
+  - name: 'ripgrep'
+    homebrew:
+      name: 'ripgrep'
+      state: 'latest'
+
+  - name: 'alacritty: repo'
+    apt_repository:
+      repo: 'ppa:mmstick76/alacritty'
+    become: true
+  - name: 'alacritty'
+    apt:
+      name: 'alacritty'
+      state: 'latest'
+      force_apt_get: true
+    become: true
+
+  - name: 'go'
+    homebrew:
+      name: 'go'
+      state: 'latest'
+  - name: 'go: env bash'
+    lineinfile:
+      path: '~/.bashrc'
+      line: '{{ item }}'
+      create: true
+    with_items:
+    - 'export GOPATH="${HOME}/go"'
+    - 'export PATH="${GOPATH}/bin:${PATH}"'
+  - name: 'go: env fish'
+    lineinfile:
+      path: '~/.config/fish/config.fish'
+      line: '{{ item }}'
+      create: true
+    with_items:
+    - 'set -Ux GOPATH $HOME/go'
+    - 'set PATH $HOME/go/bin $PATH'
+
+  - name: 'rust'
+    homebrew:
+      name: 'rust'
+      state: 'latest'
+  - name: 'rust: env bash'
+    lineinfile:
+      path: '~/.bashrc'
+      line: '{{ item }}'
+      create: true
+    with_items:
+    - 'export RUST_SRC_PATH="$( rustc --print sysroot )/lib/rustlib/src/rust/src"'
+    - 'export PATH="~/.cargo/bin:${PATH}"'
+  - name: 'rust: env fish'
+    lineinfile:
+      path: '~/.config/fish/config.fish'
+      line: '{{ item }}'
+      create: true
+    with_items:
+    - 'set -Ux RUST_SRC_PATH "(rustc --print sysroot)/lib/rustlib/src/rust/src"'
+    - 'set PATH ~/.cargo/bin $PATH'
+
+  - name: 'lua'
+    homebrew:
+      name: ['lua', 'luarocks']
+      state: 'latest'
+
+  - name: 'neovim'
+    homebrew:
+      name:
+      - 'neovim'
+      - 'cmake'
+      state: 'latest'
+  - name: 'neovim: config'
+    git:
+      repo: 'https://github.com/luan/vimfiles.git'
+      dest: '~/.vim'
+  - name: 'neovim: symlink'
+    file:
+      src: '{{ item.src }}'
+      path: '{{ item.path }}'
+      state: 'link'
+      force: true
+    with_items:
+    - src: '{{ config }}/.vimrc.local.plugins'
+      path: '~/.vimrc.local.plugins'
+    - src: '{{ config }}/.vimrc.local'
+      path: '~/.vimrc.local'
+
+  - name: 'tmux'
+    homebrew:
+      name: 'tmux'
+      state: 'latest'
+  - name: 'tmux: config'
+    file:
+      src: '{{ config }}/.tmux.conf'
+      path: '~/.tmux.conf'
+      state: 'link'
+      force: true
+
+  - name: 'machine: tools bash'
+    lineinfile:
+      path: '~/.bashrc'
+      line: 'export PATH="{{ tools }}:${PATH}"'
+      create: true
+  - name: 'machine: tools fish'
+    lineinfile:
+      path: '~/.config/fish/config.fish'
+      line: 'set PATH {{ tools }} $PATH'
+      create: true
+
+  - name: 'git: config'
+    ini_file:
+      path: '~/.gitconfig'
+      create: true
+      section: 'include'
+      option: 'path'
+      value: '{{ config }}/.gitconfig'
+
+  - name: 'direnv'
+    homebrew:
+      name: 'direnv'
+      state: 'latest'
+  - name: 'direnv: env bash'
+    lineinfile:
+      path: '~/.bashrc'
+      line: 'eval "$(direnv hook bash)"'
+      create: true
+  - name: 'direnv: env fish'
+    lineinfile:
+      path: '~/.config/fish/config.fish'
+      line: '>direnv hook fish | source'
+      create: true
+
+  - name: 'greeting'
+    blockinfile:
+      path: '~/.config/fish/config.fish'
+      block: |
+        set -U fish_greeting "
+           ____ ___  ____ ______/ /_  (_)___  ___
+          / __ `__ \/ __ `/ ___/ __ \/ / __ \/ _ \\
+         / / / / / / /_/ / /__/ / / / / / / /  __/
+        /_/ /_/ /_/\__,_/\___/_/ /_/_/_/ /_/\___/"
+      create: true
