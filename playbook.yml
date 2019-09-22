@@ -142,6 +142,16 @@
       path: '~/.vimrc.local.plugins'
     - src: '{{ config }}/.vimrc.local'
       path: '~/.vimrc.local'
+  - name: 'neovim: editor bash'
+    lineinfile:
+      path: '~/.bashrc'
+      line: 'export EDITOR=nvim'
+      create: true
+  - name: 'neovim: editor fish'
+    lineinfile:
+      path: '~/.config/fish/config.fish'
+      line: 'set -Ux EDITOR nvim'
+      create: true
 
   - name: 'tmux'
     homebrew:
@@ -185,7 +195,7 @@
   - name: 'direnv: env fish'
     lineinfile:
       path: '~/.config/fish/config.fish'
-      line: '>direnv hook fish | source'
+      line: 'direnv hook fish | source'
       create: true
 
   - name: 'greeting'
